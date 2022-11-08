@@ -3,12 +3,16 @@ package com.codelab.basics
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.repeatable
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -60,28 +64,39 @@ fun Greetings(
         modifier = modifier.padding(vertical = 4.dp)
     ) {
         items(items = names) { name ->
-            val expanded = remember { mutableStateOf(false) }
-            val extraPadding = if (expanded.value) 48.dp else 0.dp
-            Surface(
-                color = MaterialTheme.colors.primary,
+            Greeting(name)
+        }
+    }
+}
+
+@Composable
+private fun Greeting(name: String) {
+    val expanded = remember { mutableStateOf(false) }
+    val extraPadding by animateDpAsState(
+        targetValue = if (expanded.value) 48.dp else 0.dp,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        )
+    )
+    Surface(
+        color = MaterialTheme.colors.primary,
+        modifier = Modifier
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+    ) {
+        Row(modifier = Modifier.padding(24.dp)) {
+            Column(
                 modifier = Modifier
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                    .weight(1f)
+                    .padding(bottom = extraPadding.coerceAtLeast(0.dp))
             ) {
-                Row(modifier = Modifier.padding(24.dp)) {
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(bottom = extraPadding)
-                    ) {
-                        Text(text = "Hello")
-                        Text(text = "${name}!")
-                    }
-                    Button(
-                        onClick = { expanded.value = !expanded.value }
-                    ) {
-                        Text(if (expanded.value) "Show less" else "Show more")
-                    }
-                }
+                Text(text = "Hello")
+                Text(text = "${name}!")
+            }
+            Button(
+                onClick = { expanded.value = !expanded.value }
+            ) {
+                Text(if (expanded.value) "Show less" else "Show more")
             }
         }
     }
